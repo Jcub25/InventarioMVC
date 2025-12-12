@@ -1,20 +1,47 @@
 ﻿<h2>Estadísticas del Inventario</h2>
 
-<p><strong>Promedio de Precio:</strong> ₡@ViewBag.PromedioPrecio</p>
-<p><strong>Valor Total del Inventario:</strong> ₡@ViewBag.ValorInventario</p>
+<div class="mt-4">
 
-<h3>Productos con Stock Crítico</h3>
-<ul>
-    @foreach (var p in ViewBag.StockCritico)
-    {
-        <li>@p.Nombre - Stock: @p.Stock</li>
-    }
-</ul>
+    <p><strong>Promedio de Precio:</strong> ₡@ViewBag.PromedioPrecio.ToString("N2")</p>
+    <p><strong>Valor Total del Inventario:</strong> ₡@ViewBag.ValorInventario.ToString("N2")</p>
 
-<h3>Productos ordenados del más caro al más barato</h3>
-<ul>
-    @foreach (var p in ViewBag.ProductosCaros)
-    {
-        <li>@p.Nombre - ₡@p.Precio</li>
-    }
-</ul>
+    <h3 class="mt-4">Productos con Stock Crítico (menos de 5)</h3>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Stock</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var p in ViewBag.StockCritico)
+            {
+                <tr class="table-warning">
+                    <td>@p.Nombre</td>
+                    <td>@p.Stock</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <h3 class="mt-4">Productos ordenados del más caro al más barato</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Precio</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var p in ViewBag.ProductosCaros)
+            {
+                <tr>
+                    <td>@p.Nombre</td>
+                    <td>₡@p.Precio.ToString("N2")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <a asp-action="Index" class="btn btn-secondary">Volver</a>
+</div>
