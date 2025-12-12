@@ -1,0 +1,38 @@
+﻿@model IEnumerable<InventarioMVC.Models.Producto>
+
+<h2>Productos</h2>
+
+<form method="get">
+    <input type="text" name="buscar" placeholder="Buscar producto..." />
+    <button type="submit">Buscar</button>
+</form>
+
+<p>
+    <a asp-action="Create">Nuevo Producto</a> |
+    <a asp-action="Estadisticas">Ver Estadísticas</a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Precio</th>
+            <th>Stock</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Nombre</td>
+                <td>@item.Precio</td>
+                <td>@item.Stock</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.ProductoId">Editar</a> |
+                    <a asp-action="Delete" asp-route-id="@item.ProductoId">Eliminar</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

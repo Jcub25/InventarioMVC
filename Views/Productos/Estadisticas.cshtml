@@ -1,0 +1,20 @@
+﻿<h2>Estadísticas del Inventario</h2>
+
+<p><strong>Promedio de Precio:</strong> ₡@ViewBag.PromedioPrecio</p>
+<p><strong>Valor Total del Inventario:</strong> ₡@ViewBag.ValorInventario</p>
+
+<h3>Productos con Stock Crítico</h3>
+<ul>
+    @foreach (var p in ViewBag.StockCritico)
+    {
+        <li>@p.Nombre - Stock: @p.Stock</li>
+    }
+</ul>
+
+<h3>Productos ordenados del más caro al más barato</h3>
+<ul>
+    @foreach (var p in ViewBag.ProductosCaros)
+    {
+        <li>@p.Nombre - ₡@p.Precio</li>
+    }
+</ul>

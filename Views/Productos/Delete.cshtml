@@ -1,0 +1,11 @@
+﻿@model InventarioMVC.Models.Producto
+
+<h2>Eliminar Producto</h2>
+
+<p>¿Está seguro que desea eliminar <strong>@Model.Nombre</strong>?</p>
+
+<form asp-action="Delete">
+    <input type="hidden" asp-for="ProductoId" />
+    <button type="submit">Eliminar</button>
+    <a asp-action="Index">Cancelar</a>
+</form>
