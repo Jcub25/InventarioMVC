@@ -14,22 +14,39 @@ namespace InventarioMVC.Controllers
             _context = context;
         }
 
-        // ✅ LISTADO + BUSQUEDA
-        public async Task<IActionResult> Index(string buscar)
+        // ============================
+        //      INDEX + FILTROS
+        // ============================
+        public async Task<IActionResult> Index(string buscar, string estado)
         {
-            var productos = from p in _context.Productos
-                            where p.Activo
-                            select p;
+            var productos = _context.Productos.AsQueryable();
 
+            // FILTRO POR ESTADO
+            if (estado == "activos")
+            {
+                productos = productos.Where(p => p.Activo);
+            }
+            else if (estado == "inactivos")
+            {
+                productos = productos.Where(p => !p.Activo);
+            }
+
+            // FILTRO DE BÚSQUEDA
             if (!string.IsNullOrEmpty(buscar))
             {
-                productos = productos.Where(p => p.Nombre.Contains(buscar));
+                productos = productos.Where(p => p.Nombre.ToLower().Contains(buscar.ToLower()));
             }
+
+            // Mantener valores en ViewBag
+            ViewBag.Estado = estado;
+            ViewBag.Buscar = buscar;
 
             return View(await productos.ToListAsync());
         }
 
-        // ✅ CREATE
+        // ============================
+        //          CREATE
+        // ============================
         public IActionResult Create()
         {
             return View();
@@ -41,7 +58,7 @@ namespace InventarioMVC.Controllers
         {
             if (ModelState.IsValid)
             {
-                producto.FechaRegistro = DateTime.Now; // <<< Agregar esta línea
+                producto.FechaRegistro = DateTime.Now;  // Se mantiene la fecha automatizada
 
                 _context.Add(producto);
                 await _context.SaveChangesAsync();
@@ -52,7 +69,9 @@ namespace InventarioMVC.Controllers
         }
 
 
-        // ✅ EDIT
+        // ============================
+        //           EDIT
+        // ============================
         public async Task<IActionResult> Edit(int id)
         {
             var producto = await _context.Productos.FindAsync(id);
@@ -72,31 +91,30 @@ namespace InventarioMVC.Controllers
             if (!ModelState.IsValid)
                 return View(producto);
 
-            // Obtener registro original (tracking ON)
-            var productoOriginal = await _context.Productos
-                                                 .FirstOrDefaultAsync(p => p.ProductoId == id);
+            // Obtener registro existente
+            var productoOriginal = await _context.Productos.FirstOrDefaultAsync(p => p.ProductoId == id);
 
             if (productoOriginal == null)
                 return NotFound();
 
-            // Mantener la fecha original (no la toca)
+            // NO tocar la fecha
             productoOriginal.FechaRegistro = productoOriginal.FechaRegistro;
 
-            // Actualizar SOLO los campos editables
+            // Actualizar propiedades editables
             productoOriginal.Nombre = producto.Nombre;
-            productoOriginal.Descripcion = producto.Descripcion;
+            productoOriginal.Descripcion = producto.Descripcion;   // <<< YA INCLUIDO
             productoOriginal.Precio = producto.Precio;
             productoOriginal.Stock = producto.Stock;
             productoOriginal.Activo = producto.Activo;
 
-            // Guardar cambios
             await _context.SaveChangesAsync();
-
             return RedirectToAction(nameof(Index));
         }
-        // ✅ DELETE
 
-        // GET: Productos/Delete/5
+
+        // ============================
+        //           DELETE
+        // ============================
         public async Task<IActionResult> Delete(int id)
         {
             var producto = await _context.Productos.FindAsync(id);
@@ -113,22 +131,24 @@ namespace InventarioMVC.Controllers
             var producto = await _context.Productos.FindAsync(id);
 
             if (producto == null)
-            {
-                return NotFound();   // ← Evita enviar null a Remove()
-            }
+                return NotFound();
 
             _context.Productos.Remove(producto);
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
         }
-        // ✅ ESTADÍSTICAS
+
+
+        // ============================
+        //       ESTADISTICAS
+        // ============================
         public IActionResult Estadisticas()
         {
             var productos = _context.Productos.Where(p => p.Activo);
 
-            ViewBag.PromedioPrecio = productos.Average(p => p.Precio);
-            ViewBag.ValorInventario = productos.Sum(p => p.Precio * p.Stock);
+            ViewBag.PromedioPrecio = productos.Any() ? productos.Average(p => p.Precio) : 0;
+            ViewBag.ValorInventario = productos.Any() ? productos.Sum(p => p.Precio * p.Stock) : 0;
             ViewBag.StockCritico = productos.Where(p => p.Stock < 5).ToList();
             ViewBag.ProductosCaros = productos.OrderByDescending(p => p.Precio).ToList();
 
